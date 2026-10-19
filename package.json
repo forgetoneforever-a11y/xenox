@@ -1,0 +1,94 @@
+{
+  "name": "glasswave-player",
+  "version": "0.19.0",
+  "description": "Glasswave — современный локальный музыкальный плеер с поддержкой плейлистов, эквалайзера и ID3-метаданных",
+  "main": "main.js",
+  "author": "Glasswave",
+  "license": "MIT",
+  "private": true,
+  "homepage": "https://github.com/glasswave/player",
+  "keywords": [
+    "electron",
+    "music",
+    "player",
+    "audio",
+    "soundcloud",
+    "equalizer",
+    "playlists",
+    "id3"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging",
+    "dist": "electron-builder --win portable",
+    "dist:dir": "electron-builder --win --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "discord-rpc": "^4.0.1",
+    "music-metadata": "^10.6.0"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.glasswave.player",
+    "productName": "Glasswave",
+    "copyright": "Copyright © 2026 Glasswave",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/music-metadata/**"
+    ],
+    "compression": "maximum",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "renderer.js",
+      "styles.css",
+      "package.json",
+      "node_modules/music-metadata/**",
+      "!**/*.map",
+      "!**/.git/**",
+      "!**/.github/**",
+      "!**/node_modules/**/{test,__tests__,tests,powered-test,example,examples}/**",
+      "!**/node_modules/**/*.d.ts",
+      "!**/node_modules/**/*.md",
+      "!**/node_modules/**/LICENSE*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-${version}-portable.${ext}",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}",
+      "unpackDirName": "Glasswave"
+    },
+    "protocols": [
+      {
+        "name": "Glasswave",
+        "schemes": [
+          "glasswave"
+        ]
+      }
+    ]
+  }
+}

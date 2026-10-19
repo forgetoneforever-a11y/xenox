@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data: blob:; media-src 'self' file: blob:; connect-src 'self'; frame-src https://w.soundcloud.com https://www.forhub.io https://forhub.io;">
+  <title>Xenox</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-section="home">
+
+<!-- ===== ФОН И ОВЕРЛЕЙ ===== -->
+<div id="appBackground" class="app-background"></div>
+<div class="glass-overlay"></div>
+
+<!-- ===== Toast ===== -->
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+<!-- ===== App shell ===== -->
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Боковая панель">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">≋</div>
+      <div class="brand-text">
+        <strong>xenox</strong>
+        <small>MUSIC PLAYER</small>
+      </div>
+      <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Свернуть меню">‹</button>
+    </div>
+
+    <nav class="nav-group" aria-label="Основное меню">
+      <div class="nav-label">МЕНЮ</div>
+
+      <button type="button" class="nav active" data-nav="home">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 11.5L12 4l9 7.5"/>
+          <path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>
+        </svg>
+        <span>Обзор</span>
+      </button>
+
+      <button type="button" class="nav" data-nav="library">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6" cy="18" r="3"/>
+          <circle cx="18" cy="16" r="3"/>
+        </svg>
+        <span>Библиотека</span>
+      </button>
+
+      <button type="button" class="nav" data-nav="community">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="9" cy="8" r="3"/>
+          <path d="M3 21v-2a6 6 0 0 1 12 0v2"/>
+          <circle cx="17" cy="9" r="2.5"/>
+          <path d="M14 21v-1a4 4 0 0 1 8 0v1"/>
+        </svg>
+        <span>Сообщество</span>
+      </button>
+
+      <button type="button" class="nav" data-nav="downloads">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12"/>
+          <path d="M8 11l4 4 4-4"/>
+          <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+        </svg>
+        <span>Загрузки</span>
+      </button>
+
+      <button type="button" class="nav" data-nav="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+        </svg>
+        <span>Настройки</span>
+      </button>
+    </nav>
+
+    <div class="nav-group playlists-group">
+      <div class="nav-label">
+        ПЛЕЙЛИСТЫ
+        <button type="button" id="newPlaylistBtn" class="icon-btn-sm" title="Создать плейлист">＋</button>
+      </div>
+      <div id="playlistsList" class="playlists-list"></div>
+    </div>
+
+    <div class="nav-group profile-group">
+      <div class="nav-label">ПРОФИЛЬ</div>
+      <button type="button" class="profile-button" id="profileBtn">
+        <div class="profile-avatar" id="profileAvatar">U</div>
+        <div class="profile-info">
+          <b id="profileName">Пользователь</b>
+          <small id="profilePlays">0 прослушиваний</small>
+        </div>
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-bottom">XENOX <span>v0.42</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button type="button" class="icon-btn" id="backBtn" title="Назад" aria-label="Назад" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="breadcrumbs"><span id="breadcrumbSection">Обзор</span></div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-wrap" id="searchWrap">
+          <div class="search-input-box">
+            <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="M21 21l-4.3-4.3"/>
+            </svg>
+            <input id="globalSearch" type="search" placeholder="Поиск треков…" autocomplete="off">
+            <button type="button" id="clearGlobalSearchBtn" class="clear-search-btn hidden" aria-label="Очистить">×</button>
+          </div>
+          <div id="searchSuggestions" class="search-suggestions hidden"></div>
+        </div>
+        <button type="button" id="quickSettingsBtn" class="icon-btn" title="Настройки" aria-label="Настройки">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ===== HOME ===== -->
+    <section id="homeSection" class="section">
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">СЛУШАЙ. СОБИРАЙ. СОХРАНЯЙ.</div>
+          <h1>Твоя музыка.<br><em>Твоё пространство.</em></h1>
+          <p>Добавляй локальные аудиофайлы и сохраняй доступные треки по прямой ссылке.</p>
+          <div class="hero-actions">
+            <button type="button" id="importBtnHome" class="primary">＋ Добавить файлы</button>
+            <button type="button" data-nav="downloads" class="secondary">Загрузить по ссылке</button>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="eq-bars"><span></span><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        <article class="panel quick-card" data-open="library" role="button" tabindex="0">
+          <div class="icon-tile green" aria-hidden="true">♫</div>
+          <h3>Моя библиотека</h3>
+          <p id="quickLibraryCount">0 треков</p>
+        </article>
+        <article class="panel quick-card" data-open="community" role="button" tabindex="0">
+          <div class="icon-tile blue" aria-hidden="true">👥</div>
+          <h3>Сообщество</h3>
+          <p>Пользователи рядом</p>
+        </article>
+        <article class="panel quick-card" data-open="settings" role="button" tabindex="0">
+          <div class="icon-tile purple" aria-hidden="true">⚙</div>
+          <h3>Настройки</h3>
+          <p>Темы, эквалайзер, горячие клавиши</p>
+        </article>
+      </div>
+
+      <div class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Недавно добавленные</h2>
+            <p>Последние треки в библиотеке</p>
+          </div>
+        </div>
+        <div id="recentTracks" class="recent-grid"></div>
+      </div>
+    </section>
+
+    <!-- ===== LIBRARY ===== -->
+    <section id="librarySection" class="section hidden">
+      <div class="panel library-panel">
+        <div class="library-head">
+          <div>
+            <h2>Моя библиотека</h2>
+            <p id="librarySubtitle">0 треков</p>
+          </div>
+          <div class="library-head-actions">
+            <button type="button" id="importBtn" class="primary">＋ Добавить</button>
+            <button type="button" id="exportLibBtn" class="secondary">Экспорт</button>
+            <button type="button" id="importLibBtn" class="secondary">Импорт</button>
+          </div>
+        </div>
+
+        <div class="library-tabs" role="tablist">
+          <button type="button" class="lib-tab active" data-tab="all">Все</button>
+          <button type="button" class="lib-tab" data-tab="favorites">Избранное</button>
+          <button type="button" class="lib-tab" data-tab="recent">Недавние</button>
+        </div>
+
+        <div class="library-search-row">
+          <input id="librarySearch" type="search" placeholder="Поиск по названию, артисту, пути…" autocomplete="off">
+          <button type="button" id="clearSearchBtn" class="icon-btn hidden" title="Очистить">×</button>
+        </div>
+
+        <div id="trackList" class="track-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== COMMUNITY ===== -->
+    <section id="communitySection" class="section hidden">
+      <div class="panel community-panel">
+        <div class="community-head">
+          <h2>Сообщество</h2>
+          <p>Пользователи Xenox в твоей сети</p>
+        </div>
+
+        <div class="community-search">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="M21 21l-4.3-4.3"/>
+          </svg>
+          <input id="userSearchInput" type="search" placeholder="Поиск по имени…" autocomplete="off">
+        </div>
+
+        <div class="lan-status" id="lanStatus">
+          <span class="pulse" aria-hidden="true"></span>
+          <span>Сканирую сеть…</span>
+        </div>
+
+        <div id="userList" class="user-list"></div>
+
+        <div id="userPlaylistsPanel" class="user-playlists-panel hidden">
+          <div class="user-playlists-head">
+            <button type="button" id="backToUsersBtn" class="icon-btn" aria-label="Назад">←</button>
+            <div>
+              <h3 id="selectedUserName">—</h3>
+              <small id="selectedUserDesc">Публичные плейлисты</small>
+            </div>
+          </div>
+          <div id="userPlaylistsList" class="user-playlists-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DOWNLOADS ===== -->
+    <section id="downloadsSection" class="section hidden">
+      <div class="panel download-panel">
+        <div class="panel-heading">
+          <div class="icon-tile purple" aria-hidden="true">↓</div>
+          <div>
+            <h2>Загрузить трек</h2>
+            <p>Ссылка на аудио или SoundCloud</p>
+          </div>
+        </div>
+
+        <label for="trackUrl">ССЫЛКА НА ТРЕК</label>
+        <div class="url-row">
+          <input id="trackUrl" type="url" placeholder="https://soundcloud.com/artist/track" autocomplete="off">
+          <button type="button" id="checkBtn" class="primary">Проверить ↗</button>
+        </div>
+        <div class="hint">Прямые MP3/M4A/OGG/WAV/FLAC-ссылки скачиваются в выбранную папку.</div>
+
+        <div class="folder-row">
+          <div class="folder-icon" aria-hidden="true">▣</div>
+          <div class="folder-copy">
+            <b>Папка загрузок</b>
+            <small id="folderPath" title="Не выбрана">Не выбрана</small>
+          </div>
+          <button type="button" id="folderBtn" class="secondary">Выбрать</button>
+          <button type="button" id="openFolderBtn" class="secondary">Открыть</button>
+        </div>
+
+        <div id="downloadProgress" class="download-progress hidden">
+          <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+          <div class="progress-text" id="progressText">Загрузка…</div>
+        </div>
+
+        <div id="soundcloudActions" class="sc-actions hidden">
+          <div class="sc-label"><span class="sc-dot" aria-hidden="true"></span> SOUNDCLOUD</div>
+          <p>SoundCloud-ссылка ведёт на страницу трека, а не на аудиофайл. Открой её и используй <b>Download file</b>, если автор разрешил скачивание.</p>
+          <div class="sc-buttons">
+            <button type="button" id="showForHubBtn" class="primary full">Открыть ForHub внутри Xenox ⌄</button>
+            <button type="button" id="openTrackBtn" class="secondary full">Открыть трек в SoundCloud ↗</button>
+          </div>
+        </div>
+
+        <div id="forhubPanel" class="forhub-panel hidden">
+          <div class="forhub-head">
+            <div>
+              <h3>ForHub · SoundCloud Downloader</h3>
+              <p>Вставь ссылку в форму сайта.</p>
+            </div>
+            <button type="button" id="hideForHubBtn" class="icon-btn" title="Свернуть">×</button>
+          </div>
+          <webview id="forhubView" src="https://www.forhub.io/soundcloud/en/" partition="persist:forhub" allowpopups></webview>
+          <button type="button" id="externalForHubBtn" class="secondary">Открыть ForHub в браузере ↗</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PLAYLIST DETAIL ===== -->
+    <section id="playlistSection" class="section hidden">
+      <div class="panel playlist-detail-panel">
+        <div class="playlist-hero">
+          <div id="playlistHeroCover" class="playlist-hero-cover">≡</div>
+          <div class="playlist-hero-info">
+            <div class="eyebrow">ПЛЕЙЛИСТ</div>
+            <h1 id="playlistHeroName">Название</h1>
+            <p id="playlistHeroDesc">Описание</p>
+            <div class="playlist-hero-actions">
+              <button type="button" id="playPlaylistBtn" class="primary">▶ Слушать</button>
+              <button type="button" id="editPlaylistFromPageBtn" class="secondary">✎ Редактировать</button>
+            </div>
+          </div>
+        </div>
+        <div id="playlistTrackList" class="track-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section id="settingsSection" class="section hidden">
+      <div class="panel settings-panel">
+        <div class="forhub-head">
+          <div>
+            <h2>Настройки</h2>
+            <p>Изменения сохраняются автоматически</p>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Оформление</h3>
+          <p>Выбери тему приложения</p>
+          <div class="theme-options" id="themeOptions"></div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Плеер</h3>
+          <label class="setting-toggle">
+            <span><b>Размер панели плеера</b><small>Выбери удобную высоту</small></span>
+            <select id="playerSizeSelect" class="modal-input" style="width: 160px; margin: 0;">
+              <option value="small">Компактный</option>
+              <option value="standard" selected>Стандартный</option>
+              <option value="large">Большой</option>
+            </select>
+          </label>
+          <label class="setting-toggle">
+            <span><b>Запоминать позицию</b><small>Продолжать с последней секунды</small></span>
+            <input id="rememberPosition" type="checkbox">
+          </label>
+          <label class="setting-toggle">
+            <span><b>Автовоспроизведение</b><small>Играть при выборе трека</small></span>
+            <input id="autoPlay" type="checkbox" checked>
+          </label>
+        </div>
+
+        <div class="settings-section">
+          <h3>Сообщество</h3>
+          <label class="setting-toggle">
+            <span><b>Показывать меня другим</b><small>Другие пользователи в сети увидят ваш профиль</small></span>
+            <input id="communityVisible" type="checkbox" checked>
+          </label>
+          <label class="setting-toggle">
+            <span><b>Публичные плейлисты</b><small>Разрешить другим видеть ваши плейлисты</small></span>
+            <input id="communitySharePlaylists" type="checkbox">
+          </label>
+        </div>
+
+        <div class="settings-section">
+          <h3>Фон приложения</h3>
+          <p>Установи фото или видео на фон</p>
+          <div class="bg-controls">
+            <button type="button" id="setBgImageBtn" class="secondary">Выбрать фото</button>
+            <button type="button" id="setBgVideoBtn" class="secondary">Выбрать видео</button>
+            <button type="button" id="clearBgBtn" class="secondary">Сбросить фон</button>
+          </div>
+
+          <div class="glass-settings">
+            <label class="slider-row">
+              <span>
+                <b>Прозрачность панелей</b>
+                <small>0% — плотные, 100% — почти невидимые</small>
+              </span>
+              <input id="glassOpacity" type="range" min="0" max="100" step="5" value="55">
+            </label>
+            <label class="slider-row">
+              <span>
+                <b>Размытие (Blur)</b>
+                <small>Эффект матового стекла</small>
+              </span>
+              <input id="glassBlur" type="range" min="0" max="40" step="2" value="22">
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Эквалайзер</h3>
+          <p>Регулировка частот</p>
+          <div class="eq-wrap">
+            <div id="equalizer" class="equalizer"></div>
+            <button type="button" id="resetEqBtn" class="secondary">Сбросить</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Библиотека</h3>
+          <label class="setting-toggle">
+            <span><b>Сохранять библиотеку</b><small>Треки и плейлисты останутся после перезапуска</small></span>
+            <input id="persistLibrary" type="checkbox" checked>
+          </label>
+          <div class="settings-actions">
+            <button type="button" id="clearLibraryBtn" class="secondary">Очистить библиотеку</button>
+            <button type="button" id="resetAllBtn" class="danger">Сбросить всё</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Горячие клавиши</h3>
+          <div class="hotkeys-list">
+            <div><kbd>Space</kbd><span>Play / Pause</span></div>
+            <div><kbd>←</kbd><kbd>→</kbd><span>Перемотка −5с / +5с</span></div>
+            <div><kbd>↑</kbd><kbd>↓</kbd><span>Громкость +5% / −5%</span></div>
+            <div><kbd>M</kbd><span>Mute</span></div>
+            <div><kbd>S</kbd><span>Shuffle</span></div>
+            <div><kbd>R</kbd><span>Repeat</span></div>
+            <div><kbd>Esc</kbd><span>Закрыть плеер</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===== Player bar ===== -->
+<div class="player-bar hidden" id="playerBar">
+  <div class="now-playing" id="nowPlaying" title="Открыть большой плеер">
+    <div class="mini-cover" id="miniCover" aria-hidden="true">♫</div>
+    <canvas id="miniVisualizer" class="mini-visualizer" width="40" height="48" aria-hidden="true"></canvas>
+    <div class="now-meta">
+      <b id="nowTitle">Ничего не играет</b>
+      <small id="nowSubtitle">Выбери трек из библиотеки</small>
+    </div>
+    <button type="button" class="heart-btn" id="nowFavBtn" title="В избранное">☆</button>
+  </div>
+
+  <div class="player-center">
+    <div class="player-buttons">
+      <button type="button" id="shuffleBtn" class="mode-btn" title="Shuffle (S)" aria-label="Shuffle">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M16 3h5v5"/>
+          <path d="M4 20L21 3"/>
+          <path d="M21 16v5h-5"/>
+          <path d="M15 15l6 6"/>
+          <path d="M4 4l5 5"/>
+        </svg>
+      </button>
+      <button type="button" id="prevTrackBtn" title="Предыдущий" aria-label="Предыдущий трек">|◀</button>
+      <button type="button" id="playPauseBtn" class="play-main" title="Play (Space)" aria-label="Воспроизвести">
+        <svg viewBox="0 0 24 24" class="icon-play" aria-hidden="true"><path d="M7 4l13 8-13 8V4z"/></svg>
+        <svg viewBox="0 0 24 24" class="icon-pause hidden" aria-hidden="true"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></svg>
+      </button>
+      <button type="button" id="nextTrackBtn" title="Следующий" aria-label="Следующий трек">▶|</button>
+      <button type="button" id="repeatBtn" class="mode-btn" title="Repeat (R)" aria-label="Repeat">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17 2l4 4-4 4"/>
+          <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
+          <path d="M7 22l-4-4 4-4"/>
+          <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
+        </svg>
+        <span class="repeat-one-badge" style="display:none;position:absolute;top:-2px;right:-2px;font-size:9px;font-weight:800;">1</span>
+      </button>
+    </div>
+    <div class="seek-row">
+      <span id="currentTime">0:00</span>
+      <input id="seekBar" type="range" min="0" max="1000" value="0" aria-label="Позиция трека">
+      <span id="durationTime">0:00</span>
+    </div>
+  </div>
+
+  <div class="player-extra">
+    <button type="button" id="muteBtn" class="icon-btn-sm" title="Mute (M)" aria-label="Mute">🔊</button>
+    <input id="volumeBar" type="range" min="0" max="1" step="0.01" value="0.85" aria-label="Громкость">
+    <button type="button" id="expandBtn" class="icon-btn-sm" title="Развернуть" aria-label="Развернуть плеер">⤢</button>
+  </div>
+
+  <audio id="audioPlayer" preload="metadata"></audio>
+</div>
+
+<!-- ===== Expanded player ===== -->
+<section id="playerExpand" class="player-expand hidden" aria-label="Полноэкранный плеер">
+  <div class="player-expand-top">
+    <button type="button" id="closeExpandedPlayer" class="icon-btn" aria-label="Свернуть плеер">⌄</button>
+    <span class="eyebrow">XENOX · СЕЙЧАС ИГРАЕТ</span>
+    <button type="button" id="editTrackBtn" class="icon-btn" title="Редактировать трек" aria-label="Редактировать">✎</button>
+  </div>
+
+  <div class="expanded-cover" id="expandedCover">
+    <canvas id="expandedVisualizer" class="expanded-visualizer" width="340" height="340" aria-hidden="true"></canvas>
+  </div>
+
+  <div class="expanded-meta">
+    <h1 id="expandedTitle">Ничего не играет</h1>
+    <p id="expandedSubtitle">Выбери трек</p>
+  </div>
+
+  <div class="expanded-seek">
+    <span id="expandedCurrentTime">0:00</span>
+    <input id="expandedSeekBar" type="range" min="0" max="1000" value="0" aria-label="Позиция трека">
+    <span id="expandedDurationTime">0:00</span>
+  </div>
+
+  <div class="expanded-controls">
+    <button type="button" id="expandedShuffleBtn" aria-label="Shuffle" title="Shuffle">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M16 3h5v5"/>
+        <path d="M4 20L21 3"/>
+        <path d="M21 16v5h-5"/>
+        <path d="M15 15l6 6"/>
+        <path d="M4 4l5 5"/>
+      </svg>
+    </button>
+    <button type="button" id="expandedPrevBtn" aria-label="Предыдущий трек">|◀</button>
+    <button type="button" id="expandedPlayBtn" class="play-main" aria-label="Воспроизвести">
+      <svg viewBox="0 0 24 24" class="icon-play" aria-hidden="true"><path d="M7 4l13 8-13 8V4z"/></svg>
+      <svg viewBox="0 0 24 24" class="icon-pause hidden" aria-hidden="true"><path d="M7 4h4v16H7zM13 4h4v16h-4z"/></svg>
+    </button>
+    <button type="button" id="expandedNextBtn" aria-label="Следующий трек">▶|</button>
+    <button type="button" id="expandedRepeatBtn" aria-label="Repeat" title="Repeat">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M17 2l4 4-4 4"/>
+        <path d="M3 11v-1a4 4 0 0 1 4-4h14"/>
+        <path d="M7 22l-4-4 4-4"/>
+        <path d="M21 13v1a4 4 0 0 1-4 4H3"/>
+      </svg>
+      <span class="repeat-one-badge" style="display:none;position:absolute;top:-2px;right:-2px;font-size:9px;font-weight:800;">1</span>
+    </button>
+  </div>
+
+  <div class="expanded-volume">
+    <span aria-hidden="true">🔊</span>
+    <input id="expandedVolumeBar" type="range" min="0" max="1" step="0.01" value="0.85" aria-label="Громкость">
+  </div>
+</section>
+
+<!-- ===== Edit track modal ===== -->
+<div id="editTrackModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>Редактировать трек</h3>
+    <div class="edit-track-form">
+      <label for="editTrackName">Название</label>
+      <input id="editTrackName" type="text" class="modal-input" placeholder="Название трека">
+
+      <label for="editTrackArtist">Исполнитель</label>
+      <input id="editTrackArtist" type="text" class="modal-input" placeholder="Исполнитель">
+
+      <label>Обложка</label>
+      <div class="cover-edit-row">
+        <div id="editCoverPreview" class="mini-cover">♫</div>
+        <button type="button" id="pickCoverBtn" class="secondary">Выбрать фото</button>
+        <button type="button" id="removeCoverBtn" class="secondary">Удалить</button>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button type="button" id="cancelEditBtn" class="secondary">Отмена</button>
+      <button type="button" id="saveEditBtn" class="primary">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Edit playlist modal ===== -->
+<div id="editPlaylistModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>Редактировать плейлист</h3>
+    <div class="edit-track-form">
+      <label for="editPlaylistName">Название</label>
+      <input id="editPlaylistName" type="text" class="modal-input" placeholder="Название плейлиста">
+
+      <label for="editPlaylistDesc">Описание</label>
+      <input id="editPlaylistDesc" type="text" class="modal-input" placeholder="Описание (необязательно)">
+
+      <label>Аватарка</label>
+      <div class="cover-edit-row">
+        <div id="editPlaylistCover" class="mini-cover">≡</div>
+        <button type="button" id="pickPlaylistCoverBtn" class="secondary">Выбрать фото</button>
+        <button type="button" id="removePlaylistCoverBtn" class="secondary">Удалить</button>
+      </div>
+
+      <label class="setting-toggle" style="padding: 12px 0 0 0;">
+        <span><b>Публичный плейлист</b><small>Другие пользователи увидят его в поиске</small></span>
+        <input id="editPlaylistPublic" type="checkbox">
+      </label>
+    </div>
+    <div class="modal-actions" style="justify-content: space-between; margin-top: 20px;">
+      <button type="button" id="deletePlaylistBtn" class="danger">Удалить плейлист</button>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" id="cancelPlaylistEditBtn" class="secondary">Отмена</button>
+        <button type="button" id="savePlaylistEditBtn" class="primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Profile modal ===== -->
+<div id="profileModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>Мой профиль</h3>
+    <div class="profile-edit">
+      <div class="profile-edit-avatar">
+        <div id="profileEditAvatar" class="profile-avatar large">U</div>
+        <button type="button" id="pickProfileAvatarBtn" class="secondary">Выбрать фото</button>
+        <button type="button" id="removeProfileAvatarBtn" class="secondary">Удалить</button>
+      </div>
+      <label for="profileEditName">Имя</label>
+      <input id="profileEditName" type="text" class="modal-input" placeholder="Ваше имя">
+
+      <div class="profile-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotalPlays">0</div>
+          <div class="stat-label">Всего прослушиваний</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statUniqueTracks">0</div>
+          <div class="stat-label">Треков в библиотеке</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statFavorites">0</div>
+          <div class="stat-label">Избранных</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button type="button" id="cancelProfileBtn" class="secondary">Отмена</button>
+      <button type="button" id="saveProfileBtn" class="primary">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Context menu ===== -->
+<div id="contextMenu" class="context-menu hidden">
+  <button type="button" class="context-item" data-action="play">▶ Слушать</button>
+  <button type="button" class="context-item" data-action="fav">☆ В избранное</button>
+  <button type="button" class="context-item" data-action="playlist">＋ В плейлист</button>
+  <button type="button" class="context-item" data-action="edit">✎ Редактировать</button>
+  <div class="context-divider"></div>
+  <button type="button" class="context-item danger" data-action="remove">× Удалить</button>
+</div>
+
+<!-- ===== Generic modal ===== -->
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal" id="modal">
+    <h3 id="modalTitle">Заголовок</h3>
+    <p id="modalText">Текст</p>
+    <input id="modalInput" type="text" class="modal-input hidden">
+    <div id="playlistSelectList" class="playlist-select-list hidden"></div>
+    <div class="modal-actions">
+      <button type="button" id="modalCancel" class="secondary">Отмена</button>
+      <button type="button" id="modalConfirm" class="primary">OK</button>
+    </div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>
